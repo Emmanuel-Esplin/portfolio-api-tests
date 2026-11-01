@@ -139,6 +139,11 @@ export class BaseClient {
           );
         }
         case 'accept':
+          if (decision.exhausted) {
+            // Still failing after every allowed retry: not a heal, the attempts are in the log.
+            if (response) return response;
+            throw error;
+          }
           break;
       }
 

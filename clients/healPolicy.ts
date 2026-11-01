@@ -31,7 +31,8 @@ export interface AttemptOutcome {
 }
 
 export type Decision =
-  | { action: 'accept' }
+  /** `exhausted`: the attempt still needed healing but the limits ran out, so it did not heal. */
+  | { action: 'accept'; exhausted?: boolean }
   | { action: 'retry'; trigger: string; waitMs: number; kind: 'transient' | 'rate-limit' }
   | { action: 'drop-auth'; trigger: string }
   | { action: 'rate-limited'; trigger: string; waitMs: number; resetAt: Date };
@@ -75,10 +76,10 @@ export function rateLimitOutcome(isCI: boolean): 'skip' | 'fail' {
 
 function transientRetry(outcome: AttemptOutcome, trigger: string): Decision {
   if (!isRetryable(outcome.method, outcome.path)) return { action: 'accept' };
-  if (outcome.transientRetries >= HEAL_LIMITS.maxTransientRetries) return { action: 'accept' };
+  if (outcome.transientRetries >= HEAL_LIMITS.maxTransientRetries) return { action: 'accept', exhausted: true };
   const base = HEAL_LIMITS.backoffMs[outcome.transientRetries] ?? HEAL_LIMITS.maxWaitMs;
   const waitMs = base + Math.floor(Math.random() * HEAL_LIMITS.jitterMs);
-  if (outcome.waitedMs + waitMs > HEAL_LIMITS.maxWaitMs) return { action: 'accept' };
+  if (outcome.waitedMs + waitMs > HEAL_LIMITS.maxWaitMs) return { action: 'accept', exhausted: true };
   return { action: 'retry', trigger, waitMs, kind: 'transient' };
 }
 
