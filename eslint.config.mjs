@@ -17,6 +17,11 @@ export default defineConfig(
     extends: [tseslint.configs.disableTypeChecked],
   },
   {
+    // Playwright fixtures with no dependencies must destructure `{}`.
+    files: ['fixtures/**/*.ts', 'tests/**/*.ts'],
+    rules: { 'no-empty-pattern': 'off' },
+  },
+  {
     files: ['tests/**/*.ts'],
     extends: [playwright.configs['flat/recommended']],
     rules: {
