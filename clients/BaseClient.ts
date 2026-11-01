@@ -1,5 +1,6 @@
 import type { APIRequestContext, APIResponse } from '@playwright/test';
 import type { HealMode } from '../config/env';
+import { redactText } from '../helpers/redact';
 import { decide, HealedInStrictModeError, RateLimitedError } from './healPolicy';
 
 const BODY_LIMIT = 10 * 1024;
@@ -61,6 +62,14 @@ function truncate(text: string): string {
 
 const sleep = (ms: number) => new Promise<void>((resolve) => setTimeout(resolve, ms));
 
+/** Removes credentials from an error before it is logged, rethrown or shown in a report. */
+function scrubError(error: unknown, token: string | undefined): unknown {
+  if (!(error instanceof Error)) return error;
+  error.message = redactText(error.message, [token]);
+  if (error.stack) error.stack = redactText(error.stack, [token]);
+  return error;
+}
+
 function pathOf(url: string): string {
   return new URL(url, 'http://placeholder').pathname;
 }
@@ -100,7 +109,8 @@ export class BaseClient {
           failOnStatusCode: false,
         });
       } catch (caught) {
-        error = caught;
+        // Playwright's call log lists the request headers, including Authorization.
+        error = scrubError(caught, auth?.token);
       }
       await this.record(attempt, method, url, headers, opts.data, started, response, error);
 
@@ -175,7 +185,7 @@ export class BaseClient {
     const exchange: Exchange = {
       attempt,
       method,
-      url: response?.url() ?? url,
+      url: redactText(response?.url() ?? url),
       status: response?.status() ?? null,
       requestHeaders,
       durationMs: Date.now() - started,

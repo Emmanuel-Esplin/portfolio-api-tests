@@ -89,13 +89,14 @@ tests/      site/, github/, self-heal/
   - the `Authorization`, `Cookie` and `Set-Cookie` headers
   - keys named like `token`, `*_token`, `secret`, `password` or `api_key`
   - the token value itself, wherever it appears
+  - `Bearer` values, secret query parameters (`access_token`, `token`, `client_secret`, `api_key`), and header lines in Playwright's error call logs. A failed request's error is scrubbed before it is rethrown, so the token never reaches the terminal, `junit.xml` or the HTML report
 - Limits GitHub Pages cannot fix, such as a missing CSP or the lack of a custom 404 page, are recorded as `known-gap` annotations, not failures.
 - Commits follow Conventional Commits, and `main` is protected: changes go through a PR with CI green.
 
 ## Security
 
 - `.env*` is gitignored except `.env.example`.
-- CI uses the workflow's own `GITHUB_TOKEN`, so no personal token is stored.
+- CI uses the workflow's own `GITHUB_TOKEN`, so no personal token is stored. Only the test step receives it, and checkout does not persist credentials, so dependency install and lint code never see it.
 - Dependencies are pinned to exact versions and installed with `npm ci`. `npm audit --audit-level=high` gates CI.
 - Actions are pinned to commit SHAs, and the workflow has `permissions: contents: read`.
 - gitleaks scans every push and PR, and Dependabot opens weekly update PRs.

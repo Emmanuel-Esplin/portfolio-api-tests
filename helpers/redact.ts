@@ -25,11 +25,24 @@ function redactValue(value: unknown): unknown {
   return value;
 }
 
-/** Redacts sensitive keys, then any literal occurrence of the given secrets. */
-export function redact(value: unknown, secrets: (string | undefined)[] = []): string {
-  let text = JSON.stringify(redactValue(value), null, 2);
+// Header lines as Playwright prints them in an error's call log, e.g. "  - Authorization: Bearer …".
+const HEADER_LINE = /^(\s*-?\s*(?:authorization|cookie|set-cookie|proxy-authorization)\s*:).*$/gim;
+const BEARER = /\b(Bearer|token)\s+[A-Za-z0-9._~+/=-]{8,}/g;
+const SECRET_QUERY_PARAM = /([?&](?:access_token|token|client_secret|api_key)=)[^&\s"']+/gi;
+
+/** Redacts secrets in free text: error messages, stacks and URLs. */
+export function redactText(text: string, secrets: (string | undefined)[] = []): string {
+  let out = text
+    .replace(HEADER_LINE, `$1 ${REDACTED}`)
+    .replace(BEARER, `$1 ${REDACTED}`)
+    .replace(SECRET_QUERY_PARAM, `$1${REDACTED}`);
   for (const secret of secrets) {
-    if (secret) text = text.split(secret).join(REDACTED);
+    if (secret) out = out.split(secret).join(REDACTED);
   }
-  return text;
+  return out;
+}
+
+/** Redacts sensitive keys, then secrets anywhere in the resulting text. */
+export function redact(value: unknown, secrets: (string | undefined)[] = []): string {
+  return redactText(JSON.stringify(redactValue(value), null, 2), secrets);
 }
