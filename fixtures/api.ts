@@ -33,7 +33,7 @@ export function recordHeal(testInfo: TestInfo, events: HealEvent[], event: HealE
 
 /** Skips locally and fails in CI, with the reset time in the reason. */
 export function handleRateLimited(testInfo: TestInfo, info: RateLimitInfo): never {
-  const reason = `${info.request} hit a ${info.trigger}; resets at ${info.resetAt.toISOString()}`;
+  const reason = `${info.request}: ${info.trigger}; resets at ${info.resetAt.toISOString()}`;
   if (rateLimitOutcome(isCI) === 'skip') testInfo.skip(true, reason);
   throw new Error(reason);
 }

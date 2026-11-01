@@ -1,5 +1,6 @@
 import { expect, test, type APIResponse } from '@playwright/test';
 import type { z } from 'zod';
+import { redact } from './redact';
 
 function formatPath(path: PropertyKey[]): string {
   return path.reduce<string>(
@@ -74,7 +75,7 @@ export async function expectSchema<T extends z.ZodType>(response: APIResponse, s
       return `${formatPath(issue.path)}: ${issue.message}${received}`;
     });
     const testInfo = test.info();
-    await testInfo.attach('response-body.json', { body: JSON.stringify(body, null, 2), contentType: 'application/json' });
+    await testInfo.attach('response-body.json', { body: redact(body, [process.env.GITHUB_TOKEN]), contentType: 'application/json' });
     await testInfo.attach('schema-drift.json', {
       body: JSON.stringify(driftProposals(result.error.issues, body), null, 2),
       contentType: 'application/json',
