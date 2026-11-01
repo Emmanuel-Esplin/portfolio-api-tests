@@ -68,9 +68,11 @@ export async function expectSchema<T extends z.ZodType>(response: APIResponse, s
 
   const result = schema.safeParse(body);
   if (!result.success) {
-    const issues = result.error.issues.map(
-      (issue) => `${formatPath(issue.path)}: ${issue.message}, received ${describe(valueAt(body, issue.path))}`,
-    );
+    const issues = result.error.issues.map((issue) => {
+      // zod already names the received type for invalid_type; add the value for everything else.
+      const received = issue.code === 'invalid_type' ? '' : `, received ${describe(valueAt(body, issue.path))}`;
+      return `${formatPath(issue.path)}: ${issue.message}${received}`;
+    });
     const testInfo = test.info();
     await testInfo.attach('response-body.json', { body: JSON.stringify(body, null, 2), contentType: 'application/json' });
     await testInfo.attach('schema-drift.json', {

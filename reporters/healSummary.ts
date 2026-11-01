@@ -18,7 +18,7 @@ export default class HealSummaryReporter implements Reporter {
     if (project === 'self-heal') return;
     const heals = result.annotations.filter((a) => a.type === 'healed').map((a) => a.description ?? '');
     if (heals.length > 0) {
-      this.records.push({ project, test: test.titlePath().slice(1).join(' › '), outcome: result.status, heals });
+      this.records.push({ project, test: test.titlePath().slice(2).join(' › '), outcome: result.status, heals });
     }
   }
 
