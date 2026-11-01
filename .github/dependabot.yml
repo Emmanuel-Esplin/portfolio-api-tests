@@ -4,7 +4,21 @@ updates:
     directory: /
     schedule:
       interval: weekly
+    groups:
+      # One PR a week for routine bumps; majors still come one at a time.
+      npm-minor-and-patch:
+        update-types: [minor, patch]
+    ignore:
+      # typescript-eslint 8 supports TypeScript <6.1. Remove once it supports newer versions.
+      - dependency-name: typescript
+        versions: ['>=6.1.0']
+      # Types must match the Node runtime in .nvmrc (22). Bump both together by hand.
+      - dependency-name: '@types/node'
+        update-types: ['version-update:semver-major']
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
+    groups:
+      actions:
+        patterns: ['*']
