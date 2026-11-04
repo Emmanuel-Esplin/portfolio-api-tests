@@ -3,5 +3,13 @@ export const PORTFOLIO = {
   ownerName: 'Emmanuel Esplin',
   canonicalUrl: 'https://emmanuel-esplin.github.io/',
   /** The repos listed in cv-website/src/data/projects.ts. */
-  repos: ['de-cookbook-practice', 'SQL-Projects', 'Python_Projects', 'R_Projects', 'Data-engineering'],
+  repos: [
+    'nyc-taxi-pipeline',
+    'portfolio-api-tests',
+    'SQL-Projects',
+    'de-cookbook-practice',
+    'Python_Projects',
+    'Data_Science_Fundamentals',
+    'R_Projects',
+  ],
 } as const;
