@@ -72,7 +72,7 @@ The `self-heal` project (`tests/self-heal/`) checks these rules against `helpers
 
 ```text
 clients/    BaseClient (recording and healing), healPolicy, SiteClient, GitHubClient
-config/     env loader and portfolio facts (owner, canonical URL, the five repos)
+config/     env loader and portfolio facts (owner, canonical URL, the portfolio repos)
 payloads/   typed query and POST body builders
 schemas/    zod schemas for GitHub success and error bodies
 fixtures/   api (clients, logging, heal annotations), github (rate-limit guard), selfHeal (stub)
